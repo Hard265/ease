@@ -2,7 +2,11 @@
 
 import "./global.css";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  useTheme,
+  DarkTheme,
+} from "@react-navigation/native";
 import HomeScreen from "./screens/HomeScreen";
 import PlayerScreen from "./screens/PlayerScreen";
 
@@ -11,13 +15,25 @@ const RootStack = createNativeStackNavigator<{
   Player: { track: { id: string; title: string; artist: string } };
 }>();
 
+function Router() {
+  const theme = useTheme();
+  return (
+    <RootStack.Navigator
+      initialRouteName="Home"
+      screenOptions={{
+        headerStyle: { backgroundColor: theme.colors.background },
+      }}
+    >
+      <RootStack.Screen name="Home" component={HomeScreen} />
+      <RootStack.Screen name="Player" component={PlayerScreen} />
+    </RootStack.Navigator>
+  );
+}
+
 export default function App() {
   return (
-    <NavigationContainer>
-      <RootStack.Navigator initialRouteName="Home">
-        <RootStack.Screen name="Home" component={HomeScreen} />
-        <RootStack.Screen name="Player" component={PlayerScreen} />
-      </RootStack.Navigator>
+    <NavigationContainer theme={DarkTheme}>
+      <Router />
     </NavigationContainer>
   );
 }

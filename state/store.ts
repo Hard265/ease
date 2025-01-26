@@ -1,8 +1,8 @@
 import { action, makeAutoObservable, observable, runInAction } from "mobx";
 import { Audio } from "expo-av";
 import { getLocalSongs } from "../utils/getLocalSongs";
-import {parseFile} from "music-metadata";
 import _ from "lodash";
+import { extractID3v1 } from "../utils/metadata";
 
 export interface Track {
   id: string;
@@ -85,16 +85,11 @@ class PlaybackStore {
   }
 
   async getMetadata(uri: string) {
+    return {}
     // if (this.cachedMetadata.has(uri)) {
     //   return this.cachedMetadata.get(uri);
     // } else {
-    //   const a: any = await MusicInfo.getMusicInfoAsync(uri, {
-    //     title: true,
-    //     artist: true,
-    //     album: true,
-    //     genre: true,
-    //     picture: true,
-    //   });
+    //   const a: any = await extractID3v1(uri, );
 
     //   const metadata = _.pick(a, [
     //     "artists",
@@ -108,9 +103,10 @@ class PlaybackStore {
     //   runInAction(() => {
     //     this.cachedMetadata.set(uri, a);
     //   });
-      // return metadata;
-    }
+    //   return metadata;
+    // }
 
   }
+}
 
 export default new PlaybackStore();

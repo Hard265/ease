@@ -14,9 +14,9 @@ export default function SongsListItem({ item, index }: SongsListItemProps) {
   const navigation = useNavigation<RootStackParamList>();
   const [meta, setMeta] = useState<metadata>({});
 
-    useEffect(() => {
-        (async()=> store.getMetadata(item.uri))()
-    }, [item.uri]);
+  useEffect(() => {
+    (async () => store.getMetadata(item.uri))();
+  }, [item.uri]);
 
   const metadata = store.getMetadata(item.uri);
 
@@ -29,7 +29,7 @@ export default function SongsListItem({ item, index }: SongsListItemProps) {
       }}
     >
       <View className="flex-row gap-4 items-center">
-        <Text>{index + 1}</Text>
+        <Text className="dark:text-white">{index + 1}</Text>
         <View className="flex-1 flex-col">
           <Text className="font-semibold">{meta.title}</Text>
           <Text>{meta.artists}</Text>
