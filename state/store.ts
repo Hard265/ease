@@ -31,12 +31,22 @@ export type metadata = Partial<{
     duration: number;
 }>;
 
+export interface Playlist {
+    id: string;
+    name: string;
+    tracks: Track[];
+}
+
 class PlaybackStore {
     loading: boolean = true;
     songs: Track[] = [];
     focusedTrack: Track | null = null;
     isPlaying: boolean = false;
     currentDuration: number = 0;
+    playlists: Map<string, Playlist> = new Map();
+    currentPlaylist: Playlist | null = null;
+    loopTrack: boolean = false;
+    loopPlaylist: boolean = false;
 
     constructor() {
         makeAutoObservable(this, {
@@ -46,26 +56,19 @@ class PlaybackStore {
             loading: observable,
             currentDuration: observable,
             nowPlaying: computed,
+            playlists: observable,
+            currentPlaylist: observable,
+            loopTrack: observable,
+            loopPlaylist: observable,
             init: action,
+            skipBack: action,
+            skipForward: action,
+            toggleLoopPlaylist: action,
+            toggleLoopTrack: action,
         });
         this.init();
 
-        audioManager.on(
-            "playbackUpdate",
-            ({
-                isPlaying,
-                currentDuration,
-            }: {
-                isPlaying: boolean;
-                currentDuration: number;
-            }) => {
-                runInAction(() => {
-                    this.isPlaying = isPlaying;
-                    this.currentDuration =
-                        currentDuration ?? this.currentDuration;
-                });
-            },
-        );
+        audioManager.on("playbackUpdate", this.handlePlaybackUpdate);
     }
 
     get nowPlaying() {
@@ -74,8 +77,15 @@ class PlaybackStore {
 
     async init() {
         const localSongs = await getLocalSongs();
+        const defaultPlaylist: Playlist = {
+            id: "default",
+            name: "Default Playlist",
+            tracks: localSongs,
+        };
         runInAction(() => {
             this.songs = localSongs;
+            this.playlists.set(defaultPlaylist.id, defaultPlaylist);
+            this.currentPlaylist = defaultPlaylist;
             this.loading = false;
         });
     }
@@ -84,10 +94,77 @@ class PlaybackStore {
         this.focusedTrack = track;
     }
 
+    setPlaylist(playlistId: string) {
+        const playlist = this.playlists.get(playlistId);
+        if (playlist) {
+            this.currentPlaylist = playlist;
+            this.songs = playlist.tracks;
+        }
+    }
+
     async play() {
         if (this.focusedTrack) {
             await audioManager.play(this.focusedTrack.uri);
+            audioManager.on("playbackUpdate", this.handlePlaybackUpdate);
         }
+    }
+
+    handlePlaybackUpdate = ({
+        isPlaying,
+        currentDuration,
+    }: {
+        isPlaying: boolean;
+        currentDuration: number;
+    }) => {
+        runInAction(() => {
+            this.isPlaying = isPlaying;
+            this.currentDuration = currentDuration ?? this.currentDuration;
+        });
+
+        if (!isPlaying && this.loopTrack && this.focusedTrack) {
+            this.play();
+        } else if (!isPlaying && this.loopPlaylist && this.currentPlaylist) {
+            const currentIndex = this.currentPlaylist.tracks.findIndex(
+                (track) => track.id === this.focusedTrack?.id,
+            );
+            const nextIndex =
+                (currentIndex + 1) % this.currentPlaylist.tracks.length;
+            this.setTrack(this.currentPlaylist.tracks[nextIndex]);
+            this.play();
+        }
+    };
+
+    skipBack() {
+        if (this.currentPlaylist && this.focusedTrack) {
+            const currentIndex = this.currentPlaylist.tracks.findIndex(
+                (track) => track.id === this.focusedTrack?.id,
+            );
+            const prevIndex =
+                (currentIndex - 1 + this.currentPlaylist.tracks.length) %
+                this.currentPlaylist.tracks.length;
+            this.setTrack(this.currentPlaylist.tracks[prevIndex]);
+            this.play();
+        }
+    }
+
+    skipForward() {
+        if (this.currentPlaylist && this.focusedTrack) {
+            const currentIndex = this.currentPlaylist.tracks.findIndex(
+                (track) => track.id === this.focusedTrack?.id,
+            );
+            const nextIndex =
+                (currentIndex + 1) % this.currentPlaylist.tracks.length;
+            this.setTrack(this.currentPlaylist.tracks[nextIndex]);
+            this.play();
+        }
+    }
+
+    toggleLoopTrack() {
+        this.loopTrack = !this.loopTrack;
+    }
+
+    toggleLoopPlaylist() {
+        this.loopPlaylist = !this.loopPlaylist;
     }
 
     async pause() {

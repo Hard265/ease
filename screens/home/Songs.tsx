@@ -16,9 +16,6 @@ export default observer(() => {
                 renderItem={({ item, index }) => (
                     <SongsListItem item={item} index={index} />
                 )}
-                ListHeaderComponent={<View>
-                    <TextInput placeholder="Search songs" className="p-4 bg-gray-100 dark:bg-gray-800" />
-                </View>}
                 ListEmptyComponent={
                     <Text className="mt-6 text-center text-gray-500">
                         No songs found in your library.
