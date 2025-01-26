@@ -8,7 +8,6 @@ import { StatusBar } from "expo-status-bar";
 
 const RootStack = createNativeStackNavigator<{
   Home: undefined;
-  _PlayerVirtual: undefined;
 }>();
 
 export default function RootRouter() {
@@ -25,11 +24,6 @@ export default function RootRouter() {
           <RootStack.Screen
             name="Home"
             component={HomeTabsRouter}
-            options={{ headerShown: false }}
-          />
-          <RootStack.Screen
-            name="_PlayerVirtual"
-            component={() => null}
             options={{ headerShown: false }}
           />
         </RootStack.Group>
