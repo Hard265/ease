@@ -1,7 +1,18 @@
 {
-  "extends": "expo/tsconfig.base",
-  "compilerOptions": {
-    "strict": true,
-    "allowUmdGlobalAccess": true
-  }
+    "extends": "expo/tsconfig.base",
+    "compilerOptions": {
+        "strict": true,
+        "allowUmdGlobalAccess": true,
+        "baseUrl": "./",
+        "paths": {
+            "@/componets": ["./components"],
+            "@/screens": ["./screens"],
+            "@/routes": ["./routes"],
+            "@/services": ["./services"],
+            "@/utils": ["./utils"],
+            "@/assets": ["./assets"],
+            "@/hooks": ["./hooks"],
+            "@/state": ["./state"],
+        }
+    }
 }
