@@ -1,62 +1,40 @@
-import { Text, TouchableOpacity, View } from "react-native";
-import type { metadata, Track } from "../state/store";
-import { useNavigation } from "@react-navigation/native";
-import { useEffect, useState } from "react";
-import { Feather } from "@expo/vector-icons";
-import clsx from "clsx";
-import playState from "../state/store";
+import dayjs from "dayjs";
+import duration from "dayjs/plugin/duration"
+import { Text, View } from "react-native";
+import { RectButton } from "react-native-gesture-handler";
+
+dayjs.extend(duration)
 
 interface SongsListItemProps {
-  item: Track;
-  index: number;
+    item: Track;
+    index: number;
 }
 
 export default function SongsListItem({ item, index }: SongsListItemProps) {
-  const navigation = useNavigation<RootStackParamList>();
-  const [meta, setMeta] = useState<metadata>({});
-
-  const isPlaying = playState.nowPlaying?.id == item.id;
-
-  const onPress = () => {
-    playState.setTrack(item);
-    playState.play();
-    // navigation.navigate("Player");
-  };
-
-  return (
-    <TouchableOpacity
-      className={clsx(
-        "flex flex-row items-center gap-x-2 p-4 hover:bg-gray-50",
-        isPlaying && "dark:bg-white/10",
-      )}
-      onPress={onPress}
-    >
-      <View className="w-8 flex-row items-center justify-center">
-        <Text className="dark:text-white">{index + 1}</Text>
-      </View>
-      <View className="mt-1 flex size-14 flex-none items-center justify-center rounded-lg bg-gray-50">
-        <Feather name="music" color="#4b5563" size={18} />
-      </View>
-      <View className="flex-1">
-        <Text
-          className="text-base font-semibold dark:text-white"
-          numberOfLines={1}
-          ellipsizeMode="tail"
+    const duration = dayjs.duration(item.duration).format("mm:ss");
+    return (
+        <RectButton
+            style={{
+                flexDirection: "row",
+                gap: 16,
+                alignItems: "center",
+                padding: 8,
+            }}
+            onPress={()=>null}
         >
-          {item.filename}
-        </Text>
-        <Text
-          className="dark:text-white"
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {item.filename}
-        </Text>
-      </View>
-      <View>
-        <Text className="font-semibold dark:text-white">{meta.title}</Text>
-        <Text className="dark:text-white">{meta.artists}</Text>
-      </View>
-    </TouchableOpacity>
-  );
+            <View>
+                <Text className="text-white">{index + 1}</Text>
+            </View>
+            <View className="size-12 bg-gray-300"></View>
+            <View className="flex-1">
+                <Text className="text-lg font-semibold text-white">
+                    {item.title}
+                </Text>
+                <Text className="text-white">{item.artist}</Text>
+            </View>
+            <View>
+                <Text className="text-white font-medium">{duration}</Text>
+            </View>
+        </RectButton>
+    );
 }
